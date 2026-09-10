@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Medicine Management</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+
+</head>
+
+<body>
+{% include 'navigation.html' %}
+
+<div class="container">
+
+    <div class="page-header">
+
+        <div>
+
+            <h1>Medicine Management</h1>
+
+            <p class="subtitle">
+                Medicine master database and barcode scanner
+            </p>
+
+        </div>
+
+        <a href="/" class="button">
+            Home
+        </a>
+
+    </div>
+
+
+    <!-- ERROR -->
+
+    {% if error %}
+
+        <div class="error">
+            {{ error }}
+        </div>
+
+    {% endif %}
+
+
+    <!-- ========================= -->
+    <!-- BARCODE SCANNER -->
+    <!-- ========================= -->
+
+    <div class="card" id="verification" data-url="">
+        <h2>Medicine Checking</h2>
+        {% include 'prescription_picker.html' %}
+
+        <p>
+            Click the button and allow camera access.
+        </p>
+
+        <button
+            type="button"
+            class="button"
+            id="startScannerButton">
+
+            Start Barcode Scanner
+
+        </button>
+
+        <button
+            type="button"
+            class="button"
+            id="stopScannerButton"
+            style="display: none;">
+
+            Stop Scanner
+
+        </button>
+
+        <div
+            id="reader"
+            style="width: 100%; max-width: 500px; margin-top: 20px;">
+        </div>
+
+        <p id="scannerStatus" role="status"></p>
+        <p id="expiryWarning" role="alert"></p>
+        {% include "scan_controls.html" %}
+
+    </div>
+
+
+    <!-- ========================= -->
+    <!-- ADD MEDICINE -->
+    <!-- ========================= -->
+
+    <div class="card">
+
+        <h2>Add Medicine</h2>
+
+        <form method="POST"
+              action="/add-medicine">
+
+            <div class="form-grid">
+
+                <div>
+
+                    <label for="barcode">
+                        Barcode
+                    </label>
+
+                    <input
+                        id="barcode"
+                        type="text"
+                        name="barcode"
+                        placeholder="Leave blank to generate a barcode">
+
+                </div>
+
+
+                <div>
+
+                    <label for="medicine_name">
+                        Medicine Name
+                    </label>
+
+                    <input
+                        id="medicine_name"
+                        type="text"
+                        name="medicine_name"
+                        placeholder="Example: Paracetamol"
+                        required>
+
+                </div>
+
+
+                <div>
+
+                    <label for="medicine_type">
+                        Type
+                    </label>
+
+                    <select
+                        id="medicine_type"
+                        name="medicine_type"
+                        required>
+
+                        <option value="">
+                            Select Type
+                        </option>
+
+                        <option value="Tablet">
+                            Tablet
+                        </option>
+
+                        <option value="Capsule">
+                            Capsule
+                        </option>
+
+                        <option value="Injection">
+                            Injection
+                        </option>
+
+                        <option value="Saline">
+                            Saline
+                        </option>
+
+                        <option value="IV Fluid">
+                            IV Fluid
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <div>
+
+                    <label for="dose">
+                        Dose / Strength
+                    </label>
+
+                    <input
+                        id="dose"
+                        type="text"
+                        name="dose"
+                        placeholder="Example: 500 mg">
+
+                </div>
+
+
+                <div>
+
+                    <label for="route">
+                        Route
+                    </label>
+
+                    <select
+                        id="route"
+                        name="route">
+
+                        <option value="">
+                            Select Route
+                        </option>
+
+                        <option value="Oral">
+                            Oral
+                        </option>
+
+                        <option value="IV">
+                            IV
+                        </option>
+
+                        <option value="IM">
+                            IM
+                        </option>
+
+                        <option value="Topical">
+                            Topical
+                        </option>
+
+                        <option value="Other">
+                            Other
+                        </option>
+
+                    </select>
+
+                </div>
+
+            </div>
+
+            <div class="form-grid">
+                <div><label for="details">Medicine details</label><textarea id="details" name="details" placeholder="Details from the medicine packaging"></textarea></div>
+                <div><label for="manufacturing_date">Manufacturing date</label><input type="date" id="manufacturing_date" name="manufacturing_date" required></div>
+                <div><label for="expiry_date">Expiry date</label><input type="date" id="expiry_date" name="expiry_date" required></div>
+            </div>
+            <button type="submit"
+                    class="button">
+
+                Save Medicine
+
+            </button>
+
+        </form>
+
+    </div>
+
+
+    <!-- ========================= -->
+    <!-- MEDICINE LIST -->
+    <!-- ========================= -->
+
+    <div class="card">
+
+        <h2>Medicine Database</h2>
+
+        {% if medicines %}
+
+        <div class="table-container">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+
+                        <th>Barcode</th>
+                        <th>Medicine</th>
+                        <th>Type</th>
+                        <th>Dose</th>
+                        <th>Route</th><th>Details</th><th>Manufactured</th><th>Expiry</th><th>Label</th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                {% for medicine in medicines %}
+
+                    <tr>
+
+                        <td>
+                            {{ medicine["barcode"] }}
+                        </td>
+
+                        <td>
+                            {{ medicine["medicine_name"] }}
+                        </td>
+
+                        <td>
+                            {{ medicine["medicine_type"] }}
+                        </td>
+
+                        <td>
+                            {{ medicine["dose"] }}
+                        </td>
+
+                        <td>
+                            {{ medicine["route"] }}
+                        </td>
+                        <td>{{ medicine['details'] or 'Not recorded' }}</td>
+                        <td>{{ medicine['manufacturing_date'] or 'Not recorded' }}</td>
+                        <td>{{ medicine['expiry_date'] or 'Not recorded' }}</td>
+                        <td><a class="small-button" href="/medicine/{{ medicine['id'] }}/label">Print barcode</a></td>
+
+                    </tr>
+
+                {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+        {% else %}
+
+            <p>
+                No medicines have been added yet.
+            </p>
+
+        {% endif %}
+
+    </div>
+
+
+    <a href="/" class="back-link">
+        ← Home
+    </a>
+
+</div>
+
+
+<!-- Barcode scanner library -->
+
+<script src="{{ url_for('static', filename='vendor/html5-qrcode.min.js') }}"></script>
+
+<!-- Your JavaScript -->
+
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+
+</body>
+
+</html>

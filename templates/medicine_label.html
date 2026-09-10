@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Barcode label · {{ medicine['medicine_name'] }}</title>
+    <style>
+        body {font-family:Arial,sans-serif;margin:32px;color:#111}
+        .label {border:1px solid #aaa;padding:24px;display:inline-block;max-width:100%;box-sizing:border-box}
+        svg {max-width:100%;height:auto}
+        @media print {.controls {display:none} body {margin:0} .label {border:0}}
+    </style>
+</head>
+<body>
+<p class="controls"><a href="/medicines">Back to medicines</a> · <button id="printLabel" disabled onclick="window.print()">Print label</button></p>
+<article class="label">
+    <h2>{{ medicine['medicine_name'] }}</h2>
+    <p>{{ medicine['medicine_type'] }} · {{ medicine['dose'] }} · {{ medicine['route'] }}</p>
+    <svg id="barcodeLabel" data-barcode="{{ medicine['barcode'] }}" role="img" aria-label="Barcode {{ medicine['barcode'] }}"></svg>
+    <p>{{ medicine['details'] or 'No additional details recorded.' }}</p>
+    <p>Manufactured: {{ medicine['manufacturing_date'] or 'Not recorded' }}<br>
+       Expiry: {{ medicine['expiry_date'] or 'Not recorded' }}</p>
+</article>
+<p id="labelError" class="controls" role="alert"></p>
+<script src="{{ url_for('static', filename='vendor/JsBarcode.all.min.js') }}"></script>
+<script>
+try {
+    JsBarcode('#barcodeLabel', document.getElementById('barcodeLabel').dataset.barcode, {format:'CODE128', width:2, height:80, margin:20});
+    document.getElementById('printLabel').disabled = false;
+} catch (error) {
+    document.getElementById('labelError').textContent = 'Could not render barcode. Reload the page and use a printable ASCII barcode.';
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,14 @@
+<form id="manualScanForm" style="margin-top:16px">
+    <label for="scanBarcode">Barcode (USB scanner or manual entry)</label>
+    <input id="scanBarcode" autocomplete="off" placeholder="Scan or type barcode" required>
+    <button type="submit" class="button">Look up barcode</button>
+</form>
+<div style="margin-top:20px">
+    <label for="barcodeImage">Scan a barcode image (no camera needed)</label>
+    <input id="barcodeImage" type="file" accept="image/png,image/jpeg,image/webp">
+    <p>Select a barcode PNG or photo. The image is decoded in your browser.</p>
+</div>
+<div id="scannedDetails" hidden class="card" aria-live="polite">
+    <h3>Scanned medicine</h3>
+    <dl id="medicineDetails"></dl>
+</div>

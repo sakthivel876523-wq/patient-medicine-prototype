@@ -1,0 +1,15 @@
+<label for="verificationTreatment"><strong>Doctor's prescription — select the patient and medicine to verify</strong></label>
+<select id="verificationTreatment" style="margin:12px 0 18px">
+    {% if not patient %}<option value="">Select a patient's prescription</option>{% endif %}
+    {% if patient %}
+        {% for treatment in treatments %}
+        <option value="{{ url_for('verify_medicine', treatment_id=treatment['id']) }}">{{ patient['patient_id'] }} · {{ patient['name'] }} — {{ treatment['medicine_name'] }} · {{ treatment['scheduled_time'] }}</option>
+        {% endfor %}
+        {% if not treatments %}<option value="">No prescription yet — add a treatment below</option>{% endif %}
+    {% else %}
+        {% for prescription in verification_prescriptions %}
+        <option value="{{ url_for('verify_medicine', treatment_id=prescription['id']) }}">{{ prescription['patient_code'] }} · {{ prescription['patient_name'] }} — {{ prescription['medicine_name'] }} · {{ prescription['scheduled_time'] }}</option>
+        {% endfor %}
+    {% endif %}
+</select>
+<p>Scan the medicine barcode. The result appears automatically for the selected prescription.</p>

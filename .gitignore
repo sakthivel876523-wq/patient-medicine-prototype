@@ -1,0 +1,12 @@
+*.db
+*.db-*
+*.sqlite*
+backups/
+venv/
+.venv/
+__pycache__/
+*.pyc
+.env
+.env.*
+.vercel/
+*.log

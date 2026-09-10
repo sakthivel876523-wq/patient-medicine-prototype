@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Hospital Patient Management System</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+
+</head>
+
+<body>
+{% include 'navigation.html' %}
+
+<!-- =====================================================
+     TOP NAVIGATION
+===================================================== -->
+
+<header class="topbar">
+
+    <div class="brand">
+
+        <div class="brand-icon">
+            🏥
+        </div>
+
+        <div>
+            <div class="brand-title">
+                CareTrack
+            </div>
+
+            <div class="brand-subtitle">
+                Hospital Management System
+            </div>
+        </div>
+
+    </div>
+
+
+    <nav class="nav-links">
+
+        <a href="/" class="active">
+            Dashboard
+        </a>
+
+        <a href="/patients">
+            Patients
+        </a>
+
+        <a href="/medicines">
+            Medicines
+        </a>
+
+        <a href="/reminders">
+            Reminders
+        </a>
+
+    </nav>
+
+
+    <div class="nav-user">
+
+        <div class="user-avatar">
+            👨‍⚕️
+        </div>
+
+        <div class="user-text">
+
+            <strong>
+                Hospital Staff
+            </strong>
+
+            <span>
+                Management Portal
+            </span>
+
+        </div>
+
+    </div>
+
+</header>
+
+
+<!-- =====================================================
+     MAIN CONTENT
+===================================================== -->
+
+<main class="dashboard-container">
+
+
+    <!-- =================================================
+         HERO SECTION
+    ================================================== -->
+
+    <section class="hero-section">
+
+        <div class="hero-content">
+
+            <div class="hero-label">
+                ✦ SMART PATIENT CARE
+            </div>
+
+            <h1>
+                Welcome to
+                <span>CareTrack</span>
+            </h1>
+
+            <p>
+                Manage patients, medicines, treatments and
+                vital records from one simple dashboard.
+            </p>
+
+            <div class="hero-actions">
+
+                <a href="/add-patient"
+                   class="primary-button">
+
+                    <span>＋</span>
+                    Add Patient
+
+                </a>
+
+
+                <a href="/reminders"
+                   class="secondary-button">
+
+                    <span>🔔</span>
+                    Medicine Reminders
+
+                </a>
+
+            </div>
+
+        </div>
+
+
+        <div class="hero-illustration">
+
+            <div class="medical-circle circle-one">
+                +
+            </div>
+
+            <div class="medical-circle circle-two">
+                ♥
+            </div>
+
+            <div class="medical-card">
+
+                <div class="medical-card-icon">
+                    ❤️
+                </div>
+
+                <div>
+
+                    <strong>
+                        Patient Care
+                    </strong>
+
+                    <span>
+                        Everything connected
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =================================================
+         STAT CARDS
+    ================================================== -->
+
+    <section class="stats-grid">
+
+
+        <div class="stat-card">
+
+            <div class="stat-icon blue">
+                👥
+            </div>
+
+            <div>
+
+                <span>
+                    Patients
+                </span>
+
+                <strong>
+                    Managed
+                </strong>
+
+                <small>
+                    Patient records
+                </small>
+
+            </div>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <div class="stat-icon cyan">
+                💊
+            </div>
+
+            <div>
+
+                <span>
+                    Medicines
+                </span>
+
+                <strong>
+                    Inventory
+                </strong>
+
+                <small>
+                    Barcode enabled
+                </small>
+
+            </div>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <div class="stat-icon purple">
+                ⏰
+            </div>
+
+            <div>
+
+                <span>
+                    Reminders
+                </span>
+
+                <strong>
+                    Active
+                </strong>
+
+                <small>
+                    Scheduled medicines
+                </small>
+
+            </div>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <div class="stat-icon green">
+                ❤️
+            </div>
+
+            <div>
+
+                <span>
+                    Monitoring
+                </span>
+
+                <strong>
+                    Vital Signs
+                </strong>
+
+                <small>
+                    BP • Pulse • SpO₂
+                </small>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =================================================
+         MAIN DASHBOARD GRID
+    ================================================== -->
+
+    <section class="main-grid">
+
+
+        <!-- =============================================
+             QUICK ACTIONS
+        ============================================== -->
+
+        <div class="dashboard-card quick-actions">
+
+            <div class="section-heading">
+
+                <div>
+
+                    <h2>
+                        Quick Actions
+                    </h2>
+
+                    <p>
+                        Frequently used features
+                    </p>
+
+                </div>
+
+                <span class="section-symbol">
+                    ⚡
+                </span>
+
+            </div>
+
+
+            <div class="action-grid">
+
+
+                <a href="/add-patient"
+                   class="action-card">
+
+                    <div class="action-icon blue-bg">
+                        👤
+                    </div>
+
+                    <div>
+
+                        <strong>
+                            Add Patient
+                        </strong>
+
+                        <span>
+                            Register a new patient
+                        </span>
+
+                    </div>
+
+                    <b>
+                        →
+                    </b>
+
+                </a>
+
+
+                <a href="/patients"
+                   class="action-card">
+
+                    <div class="action-icon cyan-bg">
+                        📋
+                    </div>
+
+                    <div>
+
+                        <strong>
+                            Patient Records
+                        </strong>
+
+                        <span>
+                            View all patients
+                        </span>
+
+                    </div>
+
+                    <b>
+                        →
+                    </b>
+
+                </a>
+
+
+                <a href="/medicines"
+                   class="action-card">
+
+                    <div class="action-icon purple-bg">
+                        💊
+                    </div>
+
+                    <div>
+
+                        <strong>
+                            Medicine Center
+                        </strong>
+
+                        <span>
+                            Manage medicines & barcodes
+                        </span>
+
+                    </div>
+
+                    <b>
+                        →
+                    </b>
+
+                </a>
+
+
+                <a href="/reminders"
+                   class="action-card">
+
+                    <div class="action-icon green-bg">
+                        🔔
+                    </div>
+
+                    <div>
+
+                        <strong>
+                            Medicine Reminders
+                        </strong>
+
+                        <span>
+                            Track scheduled doses
+                        </span>
+
+                    </div>
+
+                    <b>
+                        →
+                    </b>
+
+                </a>
+
+            </div>
+
+        </div>
+
+
+        <!-- =============================================
+             SYSTEM FEATURES
+        ============================================== -->
+
+        <div class="dashboard-card system-card">
+
+            <div class="section-heading">
+
+                <div>
+
+                    <h2>
+                        CareTrack Features
+                    </h2>
+
+                    <p>
+                        One platform for patient care
+                    </p>
+
+                </div>
+
+                <span class="section-symbol">
+                    ✨
+                </span>
+
+            </div>
+
+
+            <div class="feature-list">
+
+
+                <div class="feature-item">
+
+                    <div class="feature-icon">
+                        🩺
+                    </div>
+
+                    <div>
+
+                        <strong>
+                            Patient Monitoring
+                        </strong>
+
+                        <span>
+                            Track vital signs and medical history
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <div class="feature-item">
+
+                    <div class="feature-icon">
+                        📦
+                    </div>
+
+                    <div>
+
+                        <strong>
+                            Barcode Medicine
+                        </strong>
+
+                        <span>
+                            Scan and identify medicines quickly
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <div class="feature-item">
+
+                    <div class="feature-icon">
+                        🔔
+                    </div>
+
+                    <div>
+
+                        <strong>
+                            Smart Reminders
+                        </strong>
+
+                        <span>
+                            Monitor upcoming and overdue doses
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <div class="feature-item">
+
+                    <div class="feature-icon">
+                        🛡️
+                    </div>
+
+                    <div>
+
+                        <strong>
+                            Organized Records
+                        </strong>
+
+                        <span>
+                            Keep patient information structured
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =================================================
+         BOTTOM INFORMATION
+    ================================================== -->
+
+    <section class="bottom-grid">
+
+
+        <div class="info-banner">
+
+            <div class="info-icon">
+                💡
+            </div>
+
+            <div>
+
+                <strong>
+                    Smart Medicine Workflow
+                </strong>
+
+                <p>
+                    Scan a medicine barcode →
+                    identify the medicine →
+                    schedule the dose →
+                    receive a reminder →
+                    mark it as given.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="system-status">
+
+            <div class="status-dot"></div>
+
+            <div>
+
+                <strong>
+                    System Ready
+                </strong>
+
+                <span>
+                    Patient management portal is active
+                </span>
+
+            </div>
+
+        </div>
+
+    </section>
+
+</main>
+
+
+<footer>
+
+    CareTrack Hospital Management System
+
+    <span>•</span>
+
+    Patient Care Dashboard
+
+</footer>
+
+
+</body>
+
+</html>

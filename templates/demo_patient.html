@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ patient['patient_id'] }} · Prescription &amp; Scan</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/demo.css') }}">
+</head>
+<body><main class="container">
+    <div class="page-header"><div><p class="demo-eyebrow">PATIENT MEDICINE VERIFICATION</p>
+        <h1>{{ patient['patient_id'] }} · {{ patient['name'] }}</h1></div>
+        <a class="button" href="/patients">Back to patients</a></div>
+    {% if treatments %}
+    {% set treatment = treatments[0] %}
+    <div class="demo-columns" id="verification" data-url="{{ url_for('verify_medicine', treatment_id=treatment['id']) }}">
+        <section class="card">
+            <p class="demo-eyebrow">DOCTOR'S PRESCRIPTION</p>
+            <h2>{{ treatment['medicine_name'] }}</h2>
+            <dl class="demo-prescription">
+                <dt>Patient</dt><dd>{{ patient['patient_id'] }} · {{ patient['name'] }}</dd>
+                <dt>Medicine type</dt><dd>{{ treatment['medicine_type'] }}</dd>
+                <dt>Dose</dt><dd>{{ treatment['dose'] }}</dd>
+                <dt>Route</dt><dd>{{ treatment['route'] }}</dd>
+                <dt>Scheduled time</dt><dd>{{ treatment['scheduled_time'] }} (9:00 PM in this demo)</dd>
+            </dl>
+            {% if treatment['medicine_id'] %}
+            <a class="small-button" href="/medicine/{{ treatment['medicine_id'] }}/label">View / print medicine barcode</a>
+            {% endif %}
+            <p class="demo-note">Demonstration prescription only.</p>
+        </section>
+        <section class="card">
+            <p class="demo-eyebrow">NURSE'S MEDICINE CHECK</p>
+            <h2>Scan medicine barcode</h2>
+            <p>Start the camera and hold the printed barcode or another phone's barcode image in view.</p>
+            <button type="button" class="button" id="startScannerButton">Start Barcode Scanner</button>
+            <button type="button" class="button" id="stopScannerButton" style="display:none">Stop Scanner</button>
+            <div id="reader" style="width:100%;margin-top:20px"></div>
+            <p id="scannerStatus" class="demo-result" role="status" aria-live="polite"></p>
+            <p id="expiryWarning" role="alert"></p>
+            {% include 'scan_controls.html' %}
+        </section>
+    </div>
+    {% else %}<section class="card"><p>No prescription is recorded for this patient.</p></section>{% endif %}
+</main>
+<script src="{{ url_for('static', filename='vendor/html5-qrcode.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body></html>

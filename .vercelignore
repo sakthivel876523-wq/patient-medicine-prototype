@@ -1,0 +1,11 @@
+*.db
+*.db-*
+*.sqlite*
+backups
+venv
+.venv
+__pycache__
+.git
+.env*
+test_*.py
+PROJECT_AUDIT.md

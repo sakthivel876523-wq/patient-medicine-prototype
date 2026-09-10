@@ -1,0 +1,1081 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>{{ patient["name"] }} - Patient Dashboard</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+
+</head>
+
+<body>
+{% include 'navigation.html' %}
+
+<div class="container">
+
+    <div class="page-header">
+
+        <div>
+            <h1>{{ patient["name"] }}</h1>
+
+            <p class="subtitle">
+                Patient ID: {{ patient["patient_id"] }}
+            </p>
+        </div>
+
+        <a href="/patients" class="button">
+            Back to Patients
+        </a>
+
+    </div>
+
+
+    {% if treatments %}
+    <section class="card">
+        <h2>Doctor's Prescription</h2>
+        <p><strong>{{ treatments[0]['medicine_name'] }}</strong> · {{ treatments[0]['dose'] }} · {{ treatments[0]['route'] }} · {{ treatments[0]['scheduled_time'] }}</p>
+        <a class="button" href="#verification">Verify medicine with camera</a>
+    </section>
+    {% endif %}
+    <!-- PATIENT -->
+
+    <div class="card">
+
+        <h2>Patient Details</h2>
+
+        <div class="details-grid">
+
+            <div>
+                <strong>Patient ID</strong>
+                <span>{{ patient["patient_id"] }}</span>
+            </div>
+
+            <div>
+                <strong>Name</strong>
+                <span>{{ patient["name"] }}</span>
+            </div>
+
+            <div>
+                <strong>Age</strong>
+                <span>{{ patient["age"] }}</span>
+            </div>
+
+            <div>
+                <strong>Gender</strong>
+                <span>{{ patient["gender"] }}</span>
+            </div>
+
+            <div>
+                <strong>Blood Group</strong>
+                <span>{{ patient["blood_group"] }}</span>
+            </div>
+
+            <div>
+                <strong>Contact</strong>
+                <span>{{ patient["contact"] }}</span>
+            </div>
+
+            <div>
+                <strong>Admission Date</strong>
+                <span>{{ patient["admission_date"] }}</span>
+            </div>
+
+            <div>
+                <strong>Ward</strong>
+                <span>{{ patient["ward"] }}</span>
+            </div>
+
+            <div>
+                <strong>Bed</strong>
+                <span>{{ patient["bed"] }}</span>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- MEDICAL HISTORY -->
+
+    <div class="card">
+
+        <h2>Medical History</h2>
+
+        <form
+            method="POST"
+            action="/patient/{{ patient['id'] }}/medical-history">
+
+            <label>
+                Previous Medical History
+            </label>
+
+            <textarea
+                name="previous_history"
+                rows="4"
+                placeholder="Previous diseases, surgeries, conditions..."
+            >{% if medical_history %}{{ medical_history["previous_history"] }}{% endif %}</textarea>
+
+
+            <label>
+                Allergies
+            </label>
+
+            <textarea
+                name="allergies"
+                rows="3"
+                placeholder="Known allergies..."
+            >{% if medical_history %}{{ medical_history["allergies"] }}{% endif %}</textarea>
+
+
+            <button class="button" type="submit">
+                Save Medical History
+            </button>
+
+        </form>
+
+    </div>
+
+
+    <!-- TREATMENTS -->
+
+    <div class="card">
+
+        <div class="page-header">
+
+            <div>
+                <h2>Medication & Treatment</h2>
+
+                <p class="subtitle">
+                    Schedule medicines and track administration.
+                </p>
+            </div>
+
+            <a href="/reminders" class="button">
+                🔔 Reminders
+            </a>
+
+        </div>
+
+
+        <!-- SCANNER -->
+
+        <div class="card" id="verification" data-url="{{ url_for('verify_medicine', treatment_id=treatments[0]['id']) if treatments else '' }}">
+            <h3>Verify prescribed medicine</h3>
+            {% include 'prescription_picker.html' %}
+
+            <p>
+                Use the camera to check this patient's medicine against the selected prescription.
+            </p>
+
+            <button
+                type="button"
+                class="button"
+                id="startScannerButton">
+
+                Start Barcode Scanner
+
+            </button>
+
+
+            <button
+                type="button"
+                class="button"
+                id="stopScannerButton"
+                style="display:none;">
+
+                Stop Scanner
+
+            </button>
+
+
+            <div
+                id="reader"
+                style="width:100%; max-width:500px; margin-top:20px;">
+            </div>
+
+            <p id="scannerStatus" role="status"></p>
+            <p id="expiryWarning" role="alert"></p>
+            {% include "scan_controls.html" %}
+
+        </div>
+
+
+        <!-- ADD TREATMENT -->
+
+        <div class="treatment-entry">
+
+            <h3>Add Scheduled Medicine</h3>
+
+            <form
+                method="POST"
+                action="/patient/{{ patient['id'] }}/treatment">
+
+                <label for="registeredMedicine">Choose a registered medicine (or scan above)</label>
+                <select id="registeredMedicine">
+                    <option value="">Enter medicine manually</option>
+                    {% for medicine in medicines %}
+                    <option value="{{ medicine['id'] }}" data-medicine="{{ dict(medicine)|tojson|forceescape }}">{{ medicine['medicine_name'] }} · {{ medicine['dose'] }} · {{ medicine['barcode'] }}</option>
+                    {% endfor %}
+                </select>
+                <input
+                    type="hidden"
+                    name="medicine_id"
+                    id="medicine_id">
+
+
+                <div class="form-grid">
+
+                    <div>
+
+                        <label>
+                            Medicine Type
+                        </label>
+
+                        <select
+                            name="medicine_type"
+                            id="medicine_type"
+                            required>
+
+                            <option value="">
+                                Select Type
+                            </option>
+
+                            <option value="Tablet">
+                                Tablet
+                            </option>
+
+                            <option value="Capsule">
+                                Capsule
+                            </option>
+
+                            <option value="Injection">
+                                Injection
+                            </option>
+
+                            <option value="Saline">
+                                Saline
+                            </option>
+
+                            <option value="IV Fluid">
+                                IV Fluid
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <div>
+
+                        <label>
+                            Medicine Name
+                        </label>
+
+                        <input
+                            type="text"
+                            name="medicine_name"
+                            id="medicine_name"
+                            placeholder="Scan or enter medicine"
+                            required>
+
+                    </div>
+
+
+                    <div>
+
+                        <label>
+                            Dose
+                        </label>
+
+                        <input
+                            type="text"
+                            name="dose"
+                            id="dose"
+                            placeholder="Example: 500 mg">
+
+                    </div>
+
+
+                    <div>
+
+                        <label>
+                            Route
+                        </label>
+
+                        <select
+                            name="route"
+                            id="route">
+
+                            <option value="">
+                                Select Route
+                            </option>
+
+                            <option value="Oral">
+                                Oral
+                            </option>
+
+                            <option value="IV">
+                                IV
+                            </option>
+
+                            <option value="IM">
+                                IM
+                            </option>
+
+                            <option value="Topical">
+                                Topical
+                            </option>
+
+                            <option value="Other">
+                                Other
+                            </option>
+
+                        </select>
+
+                    </div>
+
+                </div>
+
+
+                <!-- TIME -->
+
+                <div class="time-box">
+
+                    <label>
+                        Scheduled Time
+                    </label>
+
+                    <div class="time-selector">
+
+                        <select
+                            id="schedule_hour"
+                            name="schedule_hour"
+                            required>
+
+                            <option value="">
+                                Hour
+                            </option>
+
+                            {% for hour in range(1, 13) %}
+
+                            <option value="{{ hour }}">
+                                {{ hour }}
+                            </option>
+
+                            {% endfor %}
+
+                        </select>
+
+
+                        <span class="time-colon">
+                            :
+                        </span>
+
+
+                        <select
+                            id="schedule_minute"
+                            name="schedule_minute"
+                            required>
+
+                            <option value="">
+                                Minute
+                            </option>
+
+                            {% for minute in range(0, 60, 5) %}
+
+                            <option value="{{ '%02d'|format(minute) }}">
+                                {{ '%02d'|format(minute) }}
+                            </option>
+
+                            {% endfor %}
+
+                        </select>
+
+
+                        <select
+                            id="schedule_period"
+                            name="schedule_period"
+                            required>
+
+                            <option value="">
+                                AM / PM
+                            </option>
+
+                            <option value="AM">
+                                AM
+                            </option>
+
+                            <option value="PM">
+                                PM
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <div class="time-preview"
+                         id="timePreview">
+
+                        Select a time
+
+                    </div>
+
+                </div>
+
+
+                <button
+                    type="submit"
+                    class="button">
+
+                    + Add Treatment
+
+                </button>
+
+            </form>
+
+        </div>
+
+
+        <!-- CURRENT TREATMENTS -->
+
+        <h3>Current Treatments</h3>
+
+        {% if treatments %}
+
+        <div class="table-container">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+
+                        <th>Medicine</th>
+                        <th>Type</th>
+                        <th>Dose</th>
+                        <th>Route</th>
+                        <th>Scheduled</th>
+                        <th>Reminder</th>
+                        <th>Status</th>
+                        <th>Action</th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                {% for treatment in treatments %}
+
+                <tr class="treatment-row"
+                    data-treatment-id="{{ treatment['id'] }}"
+                    data-scheduled-time="{{ treatment['scheduled_time'] }}">
+
+                    <td>
+                        <strong>
+                            {{ treatment["medicine_name"] }}
+                        </strong>
+                    </td>
+
+                    <td>
+                        {{ treatment["medicine_type"] }}
+                    </td>
+
+                    <td>
+                        {{ treatment["dose"] }}
+                    </td>
+
+                    <td>
+                        {{ treatment["route"] }}
+                    </td>
+
+                    <td>
+
+                        <strong class="scheduled-display"
+                                data-time="{{ treatment['scheduled_time'] }}">
+
+                            {{ treatment["scheduled_time"] }}
+
+                        </strong>
+
+                    </td>
+
+                    <td>
+
+                        <strong
+                            id="countdown-{{ treatment['id'] }}">
+
+                            Calculating...
+
+                        </strong>
+
+                    </td>
+
+                    <td>
+
+                        <span id="status-{{ treatment['id'] }}">
+                            {{ treatment["status"] }}
+                        </span>
+
+                        {% if treatment["given_at"] %}
+
+                        <br>
+
+                        <small>
+                            Given:
+                            {{ treatment["given_at"] }}
+                        </small>
+
+                        {% endif %}
+
+                        {% if treatment["missed_at"] %}
+
+                        <br>
+
+                        <small>
+                            Missed:
+                            {{ treatment["missed_at"] }}
+                        </small>
+
+                        {% endif %}
+
+                    </td>
+
+                    <td>
+                        <a class="small-button" href="/treatment/{{ treatment['id'] }}/verify">Verify medicine</a>
+
+                        <a
+                            href="/treatment/{{ treatment['id'] }}/edit"
+                            class="small-button">
+
+                            Edit
+
+                        </a>
+
+
+                        <button
+                            type="button"
+                            class="small-button"
+                            onclick="markGiven({{ treatment['id'] }})">
+
+                            Given
+
+                        </button>
+
+
+                        <button
+                            type="button"
+                            class="small-button"
+                            style="background:#dc2626;"
+                            onclick="markMissed({{ treatment['id'] }})">
+
+                            Missed
+
+                        </button>
+
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+        {% else %}
+
+        <div class="empty">
+
+            <h3>
+                No treatments scheduled
+            </h3>
+
+            <p>
+                Add a medicine above to start tracking.
+            </p>
+
+        </div>
+
+        {% endif %}
+
+    </div>
+
+
+    <!-- VITALS -->
+
+    <div class="card">
+
+        <h2>Vital History</h2>
+
+        <form
+            method="POST"
+            action="/patient/{{ patient['id'] }}/vitals">
+
+            <div class="form-grid">
+
+                <div>
+
+                    <label>Blood Pressure</label>
+
+                    <input
+                        type="text"
+                        name="bp"
+                        placeholder="120/80">
+
+                </div>
+
+
+                <div>
+
+                    <label>Pulse</label>
+
+                    <input
+                        type="number"
+                        name="pulse"
+                        placeholder="72">
+
+                </div>
+
+
+                <div>
+
+                    <label>SpO₂</label>
+
+                    <input
+                        type="number"
+                        name="spo2"
+                        placeholder="98">
+
+                </div>
+
+
+                <div>
+
+                    <label>Temperature</label>
+
+                    <input
+                        type="number"
+                        step="0.1"
+                        name="temperature"
+                        placeholder="98.6">
+
+                </div>
+
+
+                <div>
+
+                    <label>Date & Time</label>
+
+                    <input
+                        type="datetime-local"
+                        name="recorded_at">
+
+                </div>
+
+            </div>
+
+
+            <button
+                class="button"
+                type="submit">
+
+                Add Vital Record
+
+            </button>
+
+        </form>
+
+
+        {% if vitals %}
+
+        <h3>Recorded Vitals</h3>
+
+        <div class="table-container">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+                        <th>BP</th>
+                        <th>Pulse</th>
+                        <th>SpO₂</th>
+                        <th>Temperature</th>
+                        <th>Date & Time</th>
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                {% for vital in vitals %}
+
+                <tr>
+
+                    <td>{{ vital["bp"] }}</td>
+
+                    <td>{{ vital["pulse"] }}</td>
+
+                    <td>{{ vital["spo2"] }}%</td>
+
+                    <td>{{ vital["temperature"] }}</td>
+
+                    <td>{{ vital["recorded_at"] }}</td>
+
+                </tr>
+
+                {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+        {% else %}
+
+        <p>
+            No vital records yet.
+        </p>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+
+<script src="{{ url_for('static', filename='vendor/html5-qrcode.min.js') }}"></script>
+
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+
+
+<script>
+
+// =====================================================
+// TIME PREVIEW
+// =====================================================
+
+function updateTimePreview() {
+
+    const hour =
+        document.getElementById("schedule_hour").value;
+
+    const minute =
+        document.getElementById("schedule_minute").value;
+
+    const period =
+        document.getElementById("schedule_period").value;
+
+    const preview =
+        document.getElementById("timePreview");
+
+    if (!hour || !minute || !period) {
+
+        preview.textContent =
+            "Select a time";
+
+        return;
+    }
+
+    preview.textContent =
+        hour + ":" + minute + " " + period;
+}
+
+
+document
+    .querySelectorAll(
+        "#schedule_hour, #schedule_minute, #schedule_period"
+    )
+    .forEach(function(element) {
+
+        element.addEventListener(
+            "change",
+            updateTimePreview
+        );
+
+    });
+
+
+// =====================================================
+// DISPLAY 12-HOUR TIME
+// =====================================================
+
+function format12Hour(timeString) {
+
+    if (!timeString) {
+        return "--";
+    }
+
+    const parts =
+        timeString.split(":");
+
+    let hour =
+        parseInt(parts[0], 10);
+
+    const minute =
+        parts[1];
+
+    const period =
+        hour >= 12 ? "PM" : "AM";
+
+    hour =
+        hour % 12;
+
+    if (hour === 0) {
+        hour = 12;
+    }
+
+    return (
+        hour +
+        ":" +
+        minute +
+        " " +
+        period
+    );
+}
+
+
+document
+    .querySelectorAll(
+        ".scheduled-display"
+    )
+    .forEach(function(element) {
+
+        element.textContent =
+            format12Hour(
+                element.dataset.time
+            );
+
+    });
+
+
+// =====================================================
+// COUNTDOWN
+// =====================================================
+
+function getScheduledDate(timeString) {
+
+    const parts =
+        timeString.split(":");
+
+    const date =
+        new Date();
+
+    date.setHours(
+        parseInt(parts[0], 10),
+        parseInt(parts[1], 10),
+        0,
+        0
+    );
+
+    return date;
+}
+
+
+function formatCountdown(seconds) {
+
+    seconds =
+        Math.abs(
+            Math.floor(seconds)
+        );
+
+    const hours =
+        Math.floor(seconds / 3600);
+
+    const minutes =
+        Math.floor(
+            (seconds % 3600) / 60
+        );
+
+    const remaining =
+        seconds % 60;
+
+    return (
+        String(hours).padStart(2, "0") +
+        ":" +
+        String(minutes).padStart(2, "0") +
+        ":" +
+        String(remaining).padStart(2, "0")
+    );
+}
+
+
+function updateTimers() {
+
+    document
+        .querySelectorAll(".treatment-row")
+        .forEach(function(row) {
+
+            const id =
+                row.dataset.treatmentId;
+
+            const scheduled =
+                row.dataset.scheduledTime;
+
+            const status =
+                document.getElementById(
+                    "status-" + id
+                ).innerText.trim();
+
+            const output =
+                document.getElementById(
+                    "countdown-" + id
+                );
+
+
+            if (status === "Given") {
+
+                output.textContent =
+                    "Completed";
+
+                output.style.color =
+                    "#16a34a";
+
+                return;
+            }
+
+
+            if (status === "Missed") {
+
+                output.textContent =
+                    "Missed";
+
+                output.style.color =
+                    "#dc2626";
+
+                return;
+            }
+
+
+            const target =
+                getScheduledDate(scheduled);
+
+            const now =
+                new Date();
+
+            const difference =
+                Math.floor(
+                    (
+                        target.getTime() -
+                        now.getTime()
+                    ) / 1000
+                );
+
+
+            if (difference > 0) {
+
+                output.textContent =
+                    "Due in " +
+                    formatCountdown(difference);
+
+                output.style.color =
+                    "#2563eb";
+
+            } else if (difference > -60) {
+
+                output.textContent =
+                    "🔔 DUE NOW";
+
+                output.style.color =
+                    "#dc2626";
+
+            } else {
+
+                output.textContent =
+                    "🔴 OVERDUE " +
+                    formatCountdown(difference);
+
+                output.style.color =
+                    "#dc2626";
+            }
+
+        });
+}
+
+
+updateTimers();
+
+setInterval(
+    updateTimers,
+    1000
+);
+
+
+// =====================================================
+// GIVEN
+// =====================================================
+
+async function markGiven(id) {
+
+    if (!confirm(
+        "Confirm this medicine was given?"
+    )) {
+        return;
+    }
+
+    const response =
+        await fetch(
+            "/treatment/" +
+            id +
+            "/given",
+            {
+                method: "POST"
+            }
+        );
+
+    const data =
+        await response.json();
+
+    if (data.success) {
+        location.reload();
+    }
+}
+
+
+// =====================================================
+// MISSED
+// =====================================================
+
+async function markMissed(id) {
+
+    if (!confirm(
+        "Mark this medicine as missed?"
+    )) {
+        return;
+    }
+
+    const response =
+        await fetch(
+            "/treatment/" +
+            id +
+            "/missed",
+            {
+                method: "POST"
+            }
+        );
+
+    const data =
+        await response.json();
+
+    if (data.success) {
+        location.reload();
+    }
+}
+
+</script>
+
+</body>
+
+</html>

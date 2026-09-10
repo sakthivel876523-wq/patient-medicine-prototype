@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Edit Treatment</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+
+</head>
+
+<body>
+{% include 'navigation.html' %}
+
+<div class="container">
+
+    <div class="page-header">
+
+        <div>
+
+            <h1>Edit Treatment</h1>
+
+            <p class="subtitle">
+                Patient: {{ patient["name"] }}
+            </p>
+
+        </div>
+
+        <a
+            href="/patient/{{ patient['id'] }}"
+            class="button">
+
+            Back to Patient
+
+        </a>
+
+    </div>
+
+
+    <div class="card">
+
+        <form
+            method="POST">
+
+            <div class="form-grid">
+
+                <div>
+
+                    <label>
+                        Medicine Type
+                    </label>
+
+                    <select
+                        name="medicine_type"
+                        required>
+
+                        <option
+                            value="Tablet"
+                            {% if treatment["medicine_type"] == "Tablet" %}selected{% endif %}>
+                            Tablet
+                        </option>
+
+                        <option
+                            value="Capsule"
+                            {% if treatment["medicine_type"] == "Capsule" %}selected{% endif %}>
+                            Capsule
+                        </option>
+
+                        <option
+                            value="Injection"
+                            {% if treatment["medicine_type"] == "Injection" %}selected{% endif %}>
+                            Injection
+                        </option>
+
+                        <option
+                            value="Saline"
+                            {% if treatment["medicine_type"] == "Saline" %}selected{% endif %}>
+                            Saline
+                        </option>
+
+                        <option
+                            value="IV Fluid"
+                            {% if treatment["medicine_type"] == "IV Fluid" %}selected{% endif %}>
+                            IV Fluid
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <div>
+
+                    <label>
+                        Medicine Name
+                    </label>
+
+                    <input
+                        type="text"
+                        name="medicine_name"
+                        value="{{ treatment['medicine_name'] }}"
+                        required>
+
+                </div>
+
+
+                <div>
+
+                    <label>
+                        Dose
+                    </label>
+
+                    <input
+                        type="text"
+                        name="dose"
+                        value="{{ treatment['dose'] }}">
+
+                </div>
+
+
+                <div>
+
+                    <label>
+                        Route
+                    </label>
+
+                    <select name="route">
+
+                        <option value="">
+                            Select Route
+                        </option>
+
+                        <option
+                            value="Oral"
+                            {% if treatment["route"] == "Oral" %}selected{% endif %}>
+                            Oral
+                        </option>
+
+                        <option
+                            value="IV"
+                            {% if treatment["route"] == "IV" %}selected{% endif %}>
+                            IV
+                        </option>
+
+                        <option
+                            value="IM"
+                            {% if treatment["route"] == "IM" %}selected{% endif %}>
+                            IM
+                        </option>
+
+                        <option
+                            value="Topical"
+                            {% if treatment["route"] == "Topical" %}selected{% endif %}>
+                            Topical
+                        </option>
+
+                        <option
+                            value="Other"
+                            {% if treatment["route"] == "Other" %}selected{% endif %}>
+                            Other
+                        </option>
+
+                    </select>
+
+                </div>
+
+            </div>
+
+
+            <div class="time-box">
+
+                <label>
+                    Scheduled Time
+                </label>
+
+                <div class="time-selector">
+
+                    <select
+                        name="schedule_hour"
+                        id="editHour"
+                        required>
+
+                        {% for hour in range(1, 13) %}
+
+                        <option
+                            value="{{ hour }}"
+                            {% if selected_hour == hour|string %}selected{% endif %}>
+
+                            {{ hour }}
+
+                        </option>
+
+                        {% endfor %}
+
+                    </select>
+
+
+                    <span class="time-colon">
+                        :
+                    </span>
+
+
+                    <select
+                        name="schedule_minute"
+                        id="editMinute"
+                        required>
+
+                        {% for minute in range(0, 60, 5) %}
+
+                        <option
+                            value="{{ '%02d'|format(minute) }}"
+                            {% if selected_minute == '%02d'|format(minute) %}selected{% endif %}>
+
+                            {{ '%02d'|format(minute) }}
+
+                        </option>
+
+                        {% endfor %}
+
+                    </select>
+
+
+                    <select
+                        name="schedule_period"
+                        id="editPeriod"
+                        required>
+
+                        <option
+                            value="AM"
+                            {% if selected_period == "AM" %}selected{% endif %}>
+                            AM
+                        </option>
+
+                        <option
+                            value="PM"
+                            {% if selected_period == "PM" %}selected{% endif %}>
+                            PM
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <div
+                    class="time-preview"
+                    id="editPreview">
+
+                    {{ selected_hour }}:{{ selected_minute }} {{ selected_period }}
+
+                </div>
+
+            </div>
+
+
+            <button
+                type="submit"
+                class="button">
+
+                Save Changes
+
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+<script>
+
+function updateEditPreview() {
+
+    const hour =
+        document.getElementById(
+            "editHour"
+        ).value;
+
+    const minute =
+        document.getElementById(
+            "editMinute"
+        ).value;
+
+    const period =
+        document.getElementById(
+            "editPeriod"
+        ).value;
+
+    document.getElementById(
+        "editPreview"
+    ).textContent =
+        hour + ":" + minute + " " + period;
+}
+
+
+document
+    .querySelectorAll(
+        "#editHour, #editMinute, #editPeriod"
+    )
+    .forEach(function(element) {
+
+        element.addEventListener(
+            "change",
+            updateEditPreview
+        );
+
+    });
+
+</script>
+
+</body>
+
+</html>

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Patient Medicine Verification Demo</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/demo.css') }}">
+</head>
+<body><main class="container">
+    <div class="page-header"><div><p class="demo-eyebrow">MEDICINE BARCODE DEMO</p>
+        <h1>Choose a patient</h1><p>View the prescription, then scan the medicine with your camera.</p></div>
+        <a class="button" href="/medicines">Medicine barcodes</a></div>
+    <div class="demo-patients">
+    {% for patient in patients|reverse %}
+        <article class="card demo-patient-card">
+            <span class="demo-patient-code">{{ patient['patient_id'] }}</span>
+            <h2>{{ patient['name'] }}</h2>
+            <p>Doctor's prescription and medicine verification</p>
+            <a class="button" href="/patient/{{ patient['id'] }}">View patient &amp; scan medicine</a>
+        </article>
+    {% endfor %}
+    </div>
+    <section class="card"><h2>How to demonstrate</h2>
+        <ol><li>Open P1 or P2.</li><li>Read the doctor's prescription.</li>
+        <li>Start the camera and show that patient's medicine barcode.</li>
+        <li>The correct medicine shows Verified. The other medicine shows Wrong Medicine.</li></ol>
+        <p>Demonstration prescriptions only. Medicine dates and strength values are fictional.</p>
+    </section>
+</main></body></html>

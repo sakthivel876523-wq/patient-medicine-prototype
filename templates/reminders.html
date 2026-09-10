@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Medicine Reminders</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+
+</head>
+
+<body>
+{% include 'navigation.html' %}
+
+<div class="container">
+
+    <div class="page-header">
+
+        <div>
+
+            <h1>Medicine Reminders</h1>
+
+            <p class="subtitle">
+                All scheduled patient medicines
+            </p>
+
+        </div>
+
+        <div>
+
+            <a href="/" class="button">
+                Home
+            </a>
+
+            <a href="/patients" class="button">
+                Patients
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <!-- CURRENT TIME -->
+
+    <div class="card">
+
+        <h2>Current Time</h2>
+
+        <h1 id="currentTime">
+            --:--:--
+        </h1>
+
+        <p>
+            Reminder dashboard updates automatically.
+        </p>
+
+    </div>
+
+
+    <!-- MEDICINES -->
+
+    <div class="card">
+
+        <h2>Scheduled Medicines</h2>
+
+        {% if treatments %}
+
+        <div class="table-container">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+
+                        <th>Patient</th>
+                        <th>Ward</th>
+                        <th>Bed</th>
+                        <th>Medicine</th>
+                        <th>Type</th>
+                        <th>Dose</th>
+                        <th>Scheduled</th>
+                        <th>Reminder</th>
+                        <th>Status</th>
+                        <th>Action</th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                {% for treatment in treatments %}
+
+                    <tr
+                        class="reminder-row"
+
+                        data-treatment-id="{{ treatment['id'] }}"
+
+                        data-scheduled-time="{{ treatment['scheduled_time'] }}"
+
+                        data-status="{{ treatment['status'] }}"
+                    >
+
+                        <td>
+
+                            <strong>
+                                {{ treatment["patient_name"] }}
+                            </strong>
+
+                            <br>
+
+                            <small>
+                                ID: {{ treatment["patient_code"] }}
+                            </small>
+
+                        </td>
+
+
+                        <td>
+                            {{ treatment["ward"] }}
+                        </td>
+
+
+                        <td>
+                            {{ treatment["bed"] }}
+                        </td>
+
+
+                        <td>
+                            {{ treatment["medicine_name"] }}
+                        </td>
+
+
+                        <td>
+                            {{ treatment["medicine_type"] }}
+                        </td>
+
+
+                        <td>
+                            {{ treatment["dose"] }}
+                        </td>
+
+
+                        <!-- 12-HOUR DISPLAY -->
+
+                        <td>
+
+                            <strong
+                                class="scheduled-display"
+                                data-time="{{ treatment['scheduled_time'] }}">
+
+                                {{ treatment["scheduled_time"] }}
+
+                            </strong>
+
+                        </td>
+
+
+                        <td>
+
+                            <strong
+                                id="reminder-{{ treatment['id'] }}">
+
+                                Calculating...
+
+                            </strong>
+
+                        </td>
+
+
+                        <td>
+
+                            <span
+                                id="status-{{ treatment['id'] }}">
+
+                                {{ treatment["status"] }}
+
+                            </span>
+
+
+                            {% if treatment["given_at"] %}
+
+                                <br>
+
+                                <small>
+                                    Given:
+                                    {{ treatment["given_at"] }}
+                                </small>
+
+                            {% endif %}
+
+
+                            {% if treatment["missed_at"] %}
+
+                                <br>
+
+                                <small>
+                                    Missed:
+                                    {{ treatment["missed_at"] }}
+                                </small>
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <td>
+
+                            <a class="small-button" href="/treatment/{{ treatment['id'] }}/verify">Verify medicine</a>
+                            <button
+                                type="button"
+                                class="small-button"
+                                onclick="markGiven({{ treatment['id'] }})">
+
+                                Given
+
+                            </button>
+
+
+                            <button
+                                type="button"
+                                class="small-button"
+                                style="background-color:#dc2626;"
+                                onclick="markMissed({{ treatment['id'] }})">
+
+                                Missed
+
+                            </button>
+
+
+                            <button
+                                type="button"
+                                class="small-button"
+                                style="background-color:#6b7280;"
+                                onclick="markPending({{ treatment['id'] }})">
+
+                                Reset
+
+                            </button>
+
+                        </td>
+
+                    </tr>
+
+                {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+        {% else %}
+
+        <div class="empty">
+
+            <h2>No scheduled medicines</h2>
+
+            <p>
+                Add a treatment to a patient first.
+            </p>
+
+        </div>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+
+<script>
+
+
+// =====================================================
+// 12-HOUR TIME FORMAT
+// =====================================================
+
+function format12Hour(timeString) {
+
+    if (!timeString) {
+        return "--";
+    }
+
+    const parts =
+        timeString.split(":");
+
+    if (parts.length < 2) {
+        return timeString;
+    }
+
+    let hours =
+        parseInt(parts[0], 10);
+
+    const minutes =
+        parts[1];
+
+    const ampm =
+        hours >= 12
+            ? "PM"
+            : "AM";
+
+    hours =
+        hours % 12;
+
+    if (hours === 0) {
+        hours = 12;
+    }
+
+    return (
+        hours +
+        ":" +
+        minutes +
+        " " +
+        ampm
+    );
+}
+
+
+// =====================================================
+// SHOW 12-HOUR SCHEDULE
+// =====================================================
+
+function updateScheduledDisplays() {
+
+    const elements =
+        document.querySelectorAll(
+            ".scheduled-display"
+        );
+
+    elements.forEach(
+        function(element) {
+
+            const time =
+                element.dataset.time;
+
+            element.textContent =
+                format12Hour(time);
+
+        }
+    );
+}
+
+
+// =====================================================
+// CURRENT TIME WITH AM/PM
+// =====================================================
+
+function updateCurrentTime() {
+
+    const now = new Date();
+
+    const formatted =
+        now.toLocaleTimeString(
+            [],
+            {
+                hour: "numeric",
+                minute: "2-digit",
+                second: "2-digit",
+                hour12: true
+            }
+        );
+
+    document.getElementById(
+        "currentTime"
+    ).textContent = formatted;
+}
+
+
+updateCurrentTime();
+
+setInterval(
+    updateCurrentTime,
+    1000
+);
+
+
+// =====================================================
+// GET TODAY'S SCHEDULED DATE
+// =====================================================
+
+function getScheduledDate(timeString) {
+
+    if (!timeString) {
+        return null;
+    }
+
+    const parts =
+        timeString.split(":");
+
+    if (parts.length < 2) {
+        return null;
+    }
+
+    const hours =
+        parseInt(parts[0], 10);
+
+    const minutes =
+        parseInt(parts[1], 10);
+
+
+    const scheduled =
+        new Date();
+
+
+    scheduled.setHours(
+        hours,
+        minutes,
+        0,
+        0
+    );
+
+
+    return scheduled;
+}
+
+
+// =====================================================
+// FORMAT COUNTDOWN
+// =====================================================
+
+function formatCountdown(seconds) {
+
+    seconds =
+        Math.abs(
+            Math.floor(seconds)
+        );
+
+
+    const hours =
+        Math.floor(
+            seconds / 3600
+        );
+
+
+    const minutes =
+        Math.floor(
+            (seconds % 3600) / 60
+        );
+
+
+    const remainingSeconds =
+        seconds % 60;
+
+
+    return (
+        String(hours).padStart(2, "0") +
+        ":" +
+        String(minutes).padStart(2, "0") +
+        ":" +
+        String(remainingSeconds).padStart(2, "0")
+    );
+}
+
+
+// =====================================================
+// UPDATE ONE REMINDER
+// =====================================================
+
+function updateReminder(row) {
+
+    const treatmentId =
+        row.dataset.treatmentId;
+
+
+    const scheduledTime =
+        row.dataset.scheduledTime;
+
+
+    const statusElement =
+        document.getElementById(
+            "status-" + treatmentId
+        );
+
+
+    const reminderElement =
+        document.getElementById(
+            "reminder-" + treatmentId
+        );
+
+
+    if (!reminderElement) {
+        return;
+    }
+
+
+    let status =
+        statusElement.innerText.trim();
+
+
+    if (status.includes("Given")) {
+        status = "Given";
+    }
+
+
+    if (status.includes("Missed")) {
+        status = "Missed";
+    }
+
+
+    // =============================================
+    // GIVEN
+    // =============================================
+
+    if (status === "Given") {
+
+        reminderElement.textContent =
+            "Completed";
+
+        reminderElement.style.color =
+            "#16a34a";
+
+        return;
+    }
+
+
+    // =============================================
+    // MISSED
+    // =============================================
+
+    if (status === "Missed") {
+
+        reminderElement.textContent =
+            "Missed";
+
+        reminderElement.style.color =
+            "#dc2626";
+
+        return;
+    }
+
+
+    const scheduled =
+        getScheduledDate(
+            scheduledTime
+        );
+
+
+    if (!scheduled) {
+
+        reminderElement.textContent =
+            "Invalid time";
+
+        return;
+    }
+
+
+    const now =
+        new Date();
+
+
+    const difference =
+        Math.floor(
+            (
+                scheduled.getTime() -
+                now.getTime()
+            ) / 1000
+        );
+
+
+    // =============================================
+    // FUTURE
+    // =============================================
+
+    if (difference > 0) {
+
+        reminderElement.textContent =
+            "Due in " +
+            formatCountdown(
+                difference
+            );
+
+        reminderElement.style.color =
+            "#2563eb";
+
+        return;
+    }
+
+
+    // =============================================
+    // DUE NOW
+    // =============================================
+
+    if (
+        difference <= 0 &&
+        difference > -60
+    ) {
+
+        reminderElement.textContent =
+            "🔔 DUE NOW";
+
+        reminderElement.style.color =
+            "#dc2626";
+
+        return;
+    }
+
+
+    // =============================================
+    // OVERDUE
+    // =============================================
+
+    reminderElement.textContent =
+        "🔴 OVERDUE " +
+        formatCountdown(
+            Math.abs(difference)
+        );
+
+    reminderElement.style.color =
+        "#dc2626";
+}
+
+
+// =====================================================
+// UPDATE ALL REMINDERS
+// =====================================================
+
+function updateAllReminders() {
+
+    const rows =
+        document.querySelectorAll(
+            ".reminder-row"
+        );
+
+
+    rows.forEach(
+        function(row) {
+
+            updateReminder(row);
+
+        }
+    );
+}
+
+
+updateScheduledDisplays();
+
+updateAllReminders();
+
+
+setInterval(
+    updateAllReminders,
+    1000
+);
+
+
+// =====================================================
+// MARK GIVEN
+// =====================================================
+
+async function markGiven(treatmentId) {
+
+    if (
+        !confirm(
+            "Confirm this medicine was given?"
+        )
+    ) {
+        return;
+    }
+
+
+    try {
+
+        const response =
+            await fetch(
+                "/treatment/" +
+                treatmentId +
+                "/given",
+                {
+                    method: "POST"
+                }
+            );
+
+
+        const data =
+            await response.json();
+
+
+        if (!data.success) {
+
+            alert(
+                data.message ||
+                "Could not update medicine."
+            );
+
+            return;
+        }
+
+
+        location.reload();
+
+    }
+    catch (error) {
+
+        console.error(error);
+
+        alert(
+            "Error updating medicine."
+        );
+    }
+}
+
+
+// =====================================================
+// MARK MISSED
+// =====================================================
+
+async function markMissed(treatmentId) {
+
+    if (
+        !confirm(
+            "Mark this medicine as missed?"
+        )
+    ) {
+        return;
+    }
+
+
+    try {
+
+        const response =
+            await fetch(
+                "/treatment/" +
+                treatmentId +
+                "/missed",
+                {
+                    method: "POST"
+                }
+            );
+
+
+        const data =
+            await response.json();
+
+
+        if (!data.success) {
+
+            alert(
+                data.message ||
+                "Could not update medicine."
+            );
+
+            return;
+        }
+
+
+        location.reload();
+
+    }
+    catch (error) {
+
+        console.error(error);
+
+        alert(
+            "Error updating medicine."
+        );
+    }
+}
+
+
+// =====================================================
+// RESET TO PENDING
+// =====================================================
+
+async function markPending(treatmentId) {
+
+    if (
+        !confirm(
+            "Reset this medicine to Pending?"
+        )
+    ) {
+        return;
+    }
+
+
+    try {
+
+        const response =
+            await fetch(
+                "/treatment/" +
+                treatmentId +
+                "/pending",
+                {
+                    method: "POST"
+                }
+            );
+
+
+        const data =
+            await response.json();
+
+
+        if (!data.success) {
+
+            alert(
+                data.message ||
+                "Could not reset medicine."
+            );
+
+            return;
+        }
+
+
+        location.reload();
+
+    }
+    catch (error) {
+
+        console.error(error);
+
+        alert(
+            "Error resetting medicine."
+        );
+    }
+}
+
+</script>
+
+</body>
+
+</html>

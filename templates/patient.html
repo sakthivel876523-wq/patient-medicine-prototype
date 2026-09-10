@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Patients</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+
+</head>
+
+<body>
+{% include 'navigation.html' %}
+
+<div class="container">
+
+    <div class="page-header">
+
+        <div>
+            <h1>Patient List</h1>
+
+            <p class="subtitle">
+                Registered patients
+            </p>
+        </div>
+
+        <a href="/add-patient"
+           class="button">
+            + Add Patient
+        </a>
+
+    </div>
+
+
+    {% if patients %}
+
+    <div class="table-container">
+
+        <table>
+
+            <thead>
+
+                <tr>
+
+                    <th>Patient ID</th>
+                    <th>Name</th>
+                    <th>Age</th>
+                    <th>Gender</th>
+                    <th>Blood Group</th>
+                    <th>Ward</th>
+                    <th>Bed</th>
+                    <th>Actions</th>
+
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+            {% for patient in patients %}
+
+                <tr>
+
+                    <td>
+                        {{ patient["patient_id"] }}
+                    </td>
+
+                    <td>
+                        {{ patient["name"] }}
+                    </td>
+
+                    <td>
+                        {{ patient["age"] }}
+                    </td>
+
+                    <td>
+                        {{ patient["gender"] }}
+                    </td>
+
+                    <td>
+                        {{ patient["blood_group"] }}
+                    </td>
+
+                    <td>
+                        {{ patient["ward"] }}
+                    </td>
+
+                    <td>
+                        {{ patient["bed"] }}
+                    </td>
+
+                    <td>
+
+                        <a
+                            href="/patient/{{ patient['id'] }}"
+                            class="small-button">
+
+                            View
+
+                        </a>
+
+
+                        <form
+                            method="POST"
+                            action="/delete-patient/{{ patient['id'] }}"
+                            style="display:inline;"
+                            onsubmit="return confirm(
+                                'Are you sure you want to remove this patient? This will also delete their medical history, treatments and vitals.'
+                            );">
+
+                            <button
+                                type="submit"
+                                class="small-button"
+                                style="background-color:#dc2626;">
+
+                                Remove
+
+                            </button>
+
+                        </form>
+
+                    </td>
+
+                </tr>
+
+            {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+    {% else %}
+
+        <div class="empty">
+
+            <h2>No patients yet</h2>
+
+            <p>
+                Add your first patient to get started.
+            </p>
+
+        </div>
+
+    {% endif %}
+
+
+    <br>
+
+    <a href="/" class="back-link">
+        ← Home
+    </a>
+
+</div>
+
+</body>
+
+</html>

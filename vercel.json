@@ -1,0 +1,12 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "python build.py",
+  "headers": [{
+    "source": "/(.*)",
+    "headers": [
+      {"key": "Permissions-Policy", "value": "camera=(self), microphone=()"},
+      {"key": "X-Content-Type-Options", "value": "nosniff"},
+      {"key": "Referrer-Policy", "value": "same-origin"}
+    ]
+  }]
+}
